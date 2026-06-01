@@ -1,2 +1,5 @@
-FROM alpine:latest
-CMD ["sh", "-c", "while true; do sleep 3600; done"]
+FROM python:3.11-alpine
+WORKDIR /app
+COPY . .
+RUN pip install flask
+CMD ["python", "app.py"]
