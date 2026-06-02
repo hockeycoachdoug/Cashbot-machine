@@ -17,14 +17,13 @@ def home():
     <a href="/generate" style="padding:10px 20px;background:#000;color:#fff;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;">⚡ Generate Posts</a>
     <a href="/terminal" style="padding:10px 20px;background:#1a1a2e;color:#fff;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;">💻 Terminal</a>
     <a href="/files" style="padding:10px 20px;background:#16213e;color:#fff;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;">📁 Files</a>
+    <a href="/content" style="padding:10px 20px;background:#2d1b69;color:#fff;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;">🎨 Content</a>
+    <a href="/dougbot" style="padding:10px 20px;background:#6b0000;color:#fff;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;">🤖 DougBot</a>
     """
 
 @app.route("/generate")
 def generate():
-    result = subprocess.run(
-        ["python", "content_engine.py"],
-        capture_output=True, text=True
-    )
+    result = subprocess.run(["python", "content_engine.py"], capture_output=True, text=True)
     output = result.stdout or result.stderr
     return f"<h1>Generated Posts</h1><pre>{output}</pre><br><a href='/'>← Back</a>"
 
@@ -80,30 +79,29 @@ def save_file(filename):
         return f"<h1>✅ Saved</h1><p>{filename} saved successfully.</p><br><a href='/files/{filename}'>View File</a> | <a href='/files'>← Files</a>"
     except Exception as e:
         return f"<h1>Error</h1><p>{str(e)}</p><br><a href='/files'>← Files</a>"
+
 @app.route("/dougbot")
 def dougbot():
     return """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>DougBot — Political Satire Generator</title>
+        <title>DougBot</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <style>
             body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }
-            h1 { color: #fff; font-size: 2em; }
-            p { color: #aaa; }
             input { width: 100%; padding: 12px; font-size: 1em; border-radius: 8px; border: none; margin: 10px 0; }
             button { width: 100%; padding: 14px; background: #ff4444; color: #fff; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
-            pre { background: #1a1a1a; padding: 15px; border-radius: 8px; white-space: pre-wrap; color: #0f0; }
         </style>
     </head>
     <body>
         <h1>🤖 DougBot</h1>
-        <p>Political satire posts, generated instantly. Enter any topic.</p>
+        <p>Political satire posts, generated instantly.</p>
         <form method='post' action='/dougbot/generate'>
             <input name='topic' placeholder='e.g. Iran, Congress, Trump, NATO...' />
             <button type='submit'>⚡ Generate 10 Posts</button>
         </form>
+        <br><a href='/' style='color:#ff4444;'>← Back</a>
     </body>
     </html>
     """
@@ -111,36 +109,15 @@ def dougbot():
 @app.route("/dougbot/generate", methods=["POST"])
 def dougbot_generate():
     topic = request.form.get("topic", "US politics")
-    import os
     from openai import OpenAI
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{
-            "role": "user",
-            "content": f"Generate 10 short, funny, biting political satire posts for X (Twitter) about: {topic}. Each post max 280 characters. Numbered list. Dry humor, punchy, shareable."
-        }]
+        messages=[{"role": "user", "content": f"Generate 10 short, funny, biting political satire posts for X (Twitter) about: {topic}. Each post max 280 characters. Numbered list. Dry humor, punchy, shareable."}]
     )
     posts = response.choices[0].message.content
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>DougBot Results</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <style>
-            body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }}
-            pre {{ background: #1a1a1a; padding: 15px; border-radius: 8px; white-space: pre-wrap; color: #0f0; }}
-            a {{ color: #ff4444; }}
-        </style>
-    </head>
-    <body>
-        <h1>🤖 DougBot</h1>
-        <pre>{posts}</pre>
-        <br><a href='/dougbot'>← Generate More</a>
-    </body>
-    </html>
-    """
+    return f"<!DOCTYPE html><html><head><title>DougBot</title><meta name='viewport' content='width=device-width, initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff;}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0;}}a{{color:#ff4444;}}</style></head><body><h1>🤖 DougBot</h1><pre>{posts}</pre><br><a href='/dougbot'>← Generate More</a> | <a href='/'>← Home</a></body></html>"
+
 @app.route("/content")
 def content():
     return """
@@ -191,46 +168,11 @@ def content_tool(tool):
             messages=[{"role": "user", "content": prompt_template.replace("{input}", user_input)}]
         )
         output = response.choices[0].message.content
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>{name}</title>
-            <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <style>
-                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }}
-                pre {{ background: #1a1a1a; padding: 15px; border-radius: 8px; white-space: pre-wrap; color: #0f0; }}
-                a {{ color: #ff4444; }}
-            </style>
-        </head>
-        <body>
-            <h1>{name}</h1>
-            <pre>{output}</pre>
-            <br><a href='/content/{tool}'>← Generate More</a> | <a href='/content'>← All Tools</a>
-        </body>
-        </html>
-        """
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>{name}</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <style>
-            body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }}
-            input {{ width: 100%; padding: 12px; font-size: 1em; border-radius: 8px; border: none; margin: 10px 0; }}
-            button {{ width: 100%; padding: 14px; background: #ff4444; color: #fff; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }}
-        </style>
-    </head>
-    <body>
-        <h1>{name}</h1>
-        <form method='post'>
-            <input name='input' placeholder='Enter {placeholder}...' />
-            <button type='submit'>⚡ Generate</button>
-        </form>
-        <br><a href='/content' style='color:#ff4444;'>← Back</a>
-    </body>
-    </html>
+        return f"<!DOCTYPE html><html><head><title>{name}</title><meta name='viewport' content='width=device-width, initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff;}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0;}}a{{color:#ff4444;}}</style></head><body><h1>{name}</h1><pre>{output}</pre><br><a href='/content/{tool}'>← Generate More</a> | <a href='/content'>← All Tools</a></body></html>"
+    return f"<!DOCTYPE html><html><head><title>{name}</title><meta name='viewport' content='width=device-width, initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff;}}input{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer;}}</style></head><body><h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...' /><button type='submit'>⚡ Generate</button></form><br><a href='/content' style='color:#ff4444;'>← Back</a></body></html>"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
     """    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
