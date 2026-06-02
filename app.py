@@ -14,7 +14,7 @@ def ai(prompt):
     return r.choices[0].message.content
 
 def page(title, body, back="/"):
-    return f"<html><head><title>{title}</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff}}input,textarea,select{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;box-sizing:border-box}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0}}a{{color:#ff4444;text-decoration:none}}.btn{{display:inline-block;padding:10px 20px;color:#fff;border-radius:5px;margin:5px}}.invoice{{background:#1a1a1a;padding:20px;border-radius:8px;border:1px solid #333}}</style></head><body>{body}<br><a href='{back}'>← Back</a></body></html>"
+    return f"<html><head><title>{title}</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff}}input,textarea,select{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;box-sizing:border-box}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0}}a{{color:#ff4444;text-decoration:none}}.btn{{display:inline-block;padding:10px 20px;color:#fff;border-radius:5px;margin:5px}}.card{{background:#1a1a1a;padding:20px;border-radius:8px;border:1px solid #333;margin:10px 0}}</style></head><body>{body}<br><a href='{back}'>← Back</a></body></html>"
 
 @app.route("/")
 def home():
@@ -173,7 +173,10 @@ def brain_tool(tool):
 @app.route("/earn")
 def earn():
     body = "<h1>EARN</h1>"
-    body += "<a href='/earn/pay' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💳 Pay — Generate invoices and payment requests</a>"
+    body += "<a href='/earn/pay' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💳 Pay — Invoice generator</a>"
+    body += "<a href='/earn/wallet' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>👛 Wallet — Track your crypto addresses</a>"
+    body += "<a href='/earn/faucet' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🚰 FaucetHub — Find free crypto faucets</a>"
+    body += "<a href='/earn/trade' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📈 Trade — Practice trading strategies</a>"
     return page("EARN", body)
 
 @app.route("/earn/pay", methods=["GET", "POST"])
@@ -185,36 +188,35 @@ def earn_pay():
         amount = request.form.get("amount", "")
         due_date = request.form.get("due_date", "")
         payment_method = request.form.get("payment_method", "")
-        invoice = f"""
-        <div class='invoice'>
-            <h2>INVOICE</h2>
-            <p><strong>From:</strong> {your_name}</p>
-            <p><strong>To:</strong> {client_name}</p>
-            <hr style='border-color:#333'>
-            <p><strong>Service:</strong> {service}</p>
-            <p><strong>Amount Due:</strong> ${amount}</p>
-            <p><strong>Due Date:</strong> {due_date}</p>
-            <p><strong>Payment Method:</strong> {payment_method}</p>
-            <hr style='border-color:#333'>
-            <p style='color:#aaa;font-size:0.9em'>Thank you for your business.</p>
-        </div>
-        <br>
-        <button onclick='window.print()' style='background:#1a4a1a'>🖨️ Print / Save as PDF</button>
-        """
-        return page("Invoice", f"<h1>💳 Invoice Generated</h1>{invoice}", "/earn/pay")
-    body = """
-    <h1>💳 Pay — Invoice Generator</h1>
-    <form method='post'>
-        <input name='your_name' placeholder='Your name or business name'/>
-        <input name='client_name' placeholder='Client name'/>
-        <input name='service' placeholder='Service provided (e.g. 30 social media posts)'/>
-        <input name='amount' placeholder='Amount (e.g. 50)'/>
-        <input name='due_date' placeholder='Due date (e.g. June 15, 2026)'/>
-        <input name='payment_method' placeholder='Payment method (e.g. PayPal, Venmo, Cash App)'/>
-        <button type='submit'>Generate Invoice</button>
-    </form>
-    """
+        invoice = f"<div class='card'><h2>INVOICE</h2><p><strong>From:</strong> {your_name}</p><p><strong>To:</strong> {client_name}</p><hr style='border-color:#333'><p><strong>Service:</strong> {service}</p><p><strong>Amount Due:</strong> ${amount}</p><p><strong>Due Date:</strong> {due_date}</p><p><strong>Payment Method:</strong> {payment_method}</p><hr style='border-color:#333'><p style='color:#aaa;font-size:0.9em'>Thank you for your business.</p></div><br><button onclick='window.print()' style='background:#1a4a1a'>Print / Save as PDF</button>"
+        return page("Invoice", f"<h1>Invoice Generated</h1>{invoice}", "/earn/pay")
+    body = "<h1>💳 Invoice Generator</h1><form method='post'><input name='your_name' placeholder='Your name or business name'/><input name='client_name' placeholder='Client name'/><input name='service' placeholder='Service provided'/><input name='amount' placeholder='Amount (e.g. 50)'/><input name='due_date' placeholder='Due date'/><input name='payment_method' placeholder='Payment method (PayPal, Venmo, etc)'/><button type='submit'>Generate Invoice</button></form>"
     return page("Pay", body, "/earn")
+
+@app.route("/earn/wallet", methods=["GET", "POST"])
+def earn_wallet():
+    if request.method == "POST":
+        coin = request.form.get("coin", "")
+        address = request.form.get("address", "")
+        note = request.form.get("note", "")
+        body = f"<h1>👛 Wallet Entry Saved</h1><div class='card'><p><strong>Coin:</strong> {coin}</p><p><strong>Address:</strong> <code style='word-break:break-all'>{address}</code></p><p><strong>Note:</strong> {note}</p></div><br><a href='/earn/wallet'>Add Another</a>"
+        return page("Wallet", body, "/earn")
+    body = "<h1>👛 Wallet Tracker</h1><p>Store your crypto receiving addresses here for quick access.</p><form method='post'><input name='coin' placeholder='Coin (e.g. Bitcoin, Ethereum, USDT)'/><input name='address' placeholder='Your wallet address'/><input name='note' placeholder='Note (e.g. main wallet, tips wallet)'/><button type='submit'>Save Address</button></form>"
+    return page("Wallet", body, "/earn")
+
+@app.route("/earn/faucet")
+def earn_faucet():
+    faucets = ai("List 10 legitimate free crypto faucets that are currently active. For each: name, URL, which coin they give, how often you can claim, and estimated earnings per day. Be honest about amounts - they are small.")
+    return page("FaucetHub", f"<h1>🚰 FaucetHub</h1><p>Free crypto faucets you can use right now:</p><pre>{faucets}</pre>", "/earn")
+
+@app.route("/earn/trade", methods=["GET", "POST"])
+def earn_trade():
+    if request.method == "POST":
+        strategy = request.form.get("strategy", "")
+        output = ai(f"Analyze this trading strategy and give detailed feedback: {strategy}. Include: strengths, weaknesses, risk level, potential improvements, and a realistic assessment of profitability. Be honest.")
+        return page("Trade", f"<h1>📈 Strategy Analysis</h1><pre>{output}</pre><a href='/earn/trade'>Analyze Another</a>", "/earn")
+    body = "<h1>📈 Trade Analyzer</h1><p>Describe a trading strategy and get AI analysis.</p><form method='post'><textarea name='strategy' placeholder='Describe your trading strategy... (e.g. Buy Bitcoin when RSI drops below 30, sell when it hits 70)' style='height:150px'></textarea><button type='submit'>Analyze Strategy</button></form>"
+    return page("Trade", body, "/earn")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
