@@ -141,5 +141,96 @@ def dougbot_generate():
     </body>
     </html>
     """
+@app.route("/content")
+def content():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Content Tools</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }
+            a { display: block; padding: 14px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 8px; margin: 8px 0; font-size: 1.1em; }
+        </style>
+    </head>
+    <body>
+        <h1>🎨 Content Tools</h1>
+        <a href="/content/viralshorts">🎬 ViralShorts — Short video scripts</a>
+        <a href="/content/marketingcopy">💼 MarketingCopy — Sales & ad copy</a>
+        <a href="/content/videohooks">🎣 VideoHooks — Viral opening hooks</a>
+        <a href="/content/captions">📝 Captions — Social media captions</a>
+        <a href="/content/keywords">🔍 Keywords — SEO keywords</a>
+        <a href="/content/thumbnailidea">🖼️ ThumbnailIdea — Thumbnail concepts</a>
+        <a href="/content/imageprompt">🎨 ImagePrompt — AI image prompts</a>
+        <br><a href="/" style="background:#000;">← Back</a>
+    </body>
+    </html>
+    """
+
+@app.route("/content/<tool>", methods=["GET", "POST"])
+def content_tool(tool):
+    tools = {
+        "viralshorts": ("🎬 ViralShorts", "topic", "Write 3 short-form video scripts (TikTok/Reels style) about: {input}. Each script: hook (1 line), body (3-4 lines), CTA (1 line). Punchy, fast, viral."),
+        "marketingcopy": ("💼 MarketingCopy", "product or service", "Write 3 variations of compelling marketing copy for: {input}. Include a headline, 2-3 body sentences, and a call to action. Persuasive and clear."),
+        "videohooks": ("🎣 VideoHooks", "topic", "Write 10 viral opening hooks for a video about: {input}. Each hook max 2 sentences. Must grab attention in the first 3 seconds."),
+        "captions": ("📝 Captions", "topic or description", "Write 5 engaging social media captions for: {input}. Mix of funny, thoughtful, and punchy. Include relevant hashtags."),
+        "keywords": ("🔍 Keywords", "topic", "Generate 20 SEO keywords and phrases for: {input}. Mix of short-tail and long-tail keywords. Format as a numbered list."),
+        "thumbnailidea": ("🖼️ ThumbnailIdea", "video topic", "Generate 5 thumbnail ideas for a video about: {input}. Describe the visual elements, text overlay, and color scheme for each."),
+        "imageprompt": ("🎨 ImagePrompt", "concept or subject", "Generate 5 detailed AI image generation prompts for: {input}. Each prompt should include subject, style, lighting, mood, and technical details.")
+    }
+    if tool not in tools:
+        return "<h1>Tool not found</h1><a href='/content'>← Back</a>"
+    name, placeholder, prompt_template = tools[tool]
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        from openai import OpenAI
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt_template.replace("{input}", user_input)}]
+        )
+        output = response.choices[0].message.content
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{name}</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }}
+                pre {{ background: #1a1a1a; padding: 15px; border-radius: 8px; white-space: pre-wrap; color: #0f0; }}
+                a {{ color: #ff4444; }}
+            </style>
+        </head>
+        <body>
+            <h1>{name}</h1>
+            <pre>{output}</pre>
+            <br><a href='/content/{tool}'>← Generate More</a> | <a href='/content'>← All Tools</a>
+        </body>
+        </html>
+        """
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{name}</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <style>
+            body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0a0a0a; color: #fff; }}
+            input {{ width: 100%; padding: 12px; font-size: 1em; border-radius: 8px; border: none; margin: 10px 0; }}
+            button {{ width: 100%; padding: 14px; background: #ff4444; color: #fff; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }}
+        </style>
+    </head>
+    <body>
+        <h1>{name}</h1>
+        <form method='post'>
+            <input name='input' placeholder='Enter {placeholder}...' />
+            <button type='submit'>⚡ Generate</button>
+        </form>
+        <br><a href='/content' style='color:#ff4444;'>← Back</a>
+    </body>
+    </html>
+    """    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
