@@ -25,6 +25,7 @@ def home():
     body += "<a href='/content' class='btn' style='background:#2d1b69'>Content</a>"
     body += "<a href='/dougbot' class='btn' style='background:#6b0000'>DougBot</a>"
     body += "<a href='/reach' class='btn' style='background:#0a3d0a'>REACH</a>"
+    body += "<a href='/brain' class='btn' style='background:#3d2800'>BRAIN</a>"
     return page("Cash.bot", body, "/")
 
 @app.route("/generate")
@@ -140,6 +141,33 @@ def reach_tool(tool):
         return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/reach/{tool}'>Generate More</a>", "/reach")
     body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
     return page(name, body, "/reach")
+
+BRAIN_TOOLS = {
+    "research": ("Deep Research", "topic or question", "You are an expert researcher. Give a thorough, accurate, well-structured report on: {i}. Include: overview, key facts, current state, opportunities, risks, and 5 actionable insights. Be specific."),
+    "summarize": ("Summarize", "text or article to summarize", "Summarize this clearly and concisely, keeping all key points: {i}"),
+    "explain": ("Explain It", "concept to explain", "Explain this in simple plain English as if to a smart 15-year-old: {i}. Use examples and analogies."),
+    "plan": ("Action Plan", "goal or problem", "Create a detailed step-by-step action plan to achieve: {i}. Include timeline, resources needed, potential obstacles, and how to overcome them."),
+    "brainstorm": ("Brainstorm", "topic or challenge", "Generate 20 creative ideas for: {i}. Range from practical to wild. No filtering. Numbered list."),
+    "debate": ("Debate Both Sides", "topic or question", "Give the strongest possible arguments FOR and AGAINST: {i}. Be balanced, fair, and thorough. Then give a neutral summary."),
+    "decision": ("Decision Helper", "decision you need to make", "Help me decide: {i}. List pros and cons of each option, the key factors to consider, and a recommended path with reasoning.")
+}
+
+@app.route("/brain")
+def brain():
+    links = "".join([f"<a href='/brain/{k}' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>{v[0]}</a>" for k, v in BRAIN_TOOLS.items()])
+    return page("BRAIN", f"<h1>BRAIN Tools</h1>{links}")
+
+@app.route("/brain/<tool>", methods=["GET", "POST"])
+def brain_tool(tool):
+    if tool not in BRAIN_TOOLS:
+        return page("Error", "<p>Tool not found</p>", "/brain")
+    name, placeholder, prompt = BRAIN_TOOLS[tool]
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        output = ai(prompt.replace("{i}", user_input))
+        return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/brain/{tool}'>Ask Again</a>", "/brain")
+    body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
+    return page(name, body, "/brain")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
