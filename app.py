@@ -48,9 +48,17 @@ def run():
 
 @app.route("/files")
 def files():
-    result = subprocess.run("ls -la /app", shell=True, capture_output=True, text=True)
-    output = result.stdout or result.stderr
-    return f"<h1>📁 Files</h1><pre>{output}</pre><br><a href='/'>← Back</a>"
-
+    result = subprocess.run("ls /app", shell=True, capture_output=True, text=True)
+    files = result.stdout.strip().split("\n")
+    links = "".join([f"<li><a href='/files/{f}'>{f}</a></li>" for f in files])
+    return f"<h1>📁 Files</h1><ul>{links}</ul><br><a href='/'>← Back</a>"
+@app.route("/files/<path:filename>")
+def view_file(filename):
+    try:
+        with open(f"/app/{filename}", "r") as f:
+            content = f.read()
+        return f"<h1>📄 {filename}</h1><pre>{content}</pre><br><a href='/files'>← Files</a>"
+    except Exception as e:
+        return f"<h1>Error</h1><p>{str(e)}</p><br><a href='/files'>← Files</a>"
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
