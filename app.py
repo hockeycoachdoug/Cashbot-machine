@@ -24,6 +24,7 @@ def home():
     body += "<a href='/files' class='btn' style='background:#16213e'>Files</a>"
     body += "<a href='/content' class='btn' style='background:#2d1b69'>Content</a>"
     body += "<a href='/dougbot' class='btn' style='background:#6b0000'>DougBot</a>"
+    body += "<a href='/reach' class='btn' style='background:#0a3d0a'>REACH</a>"
     return page("Cash.bot", body, "/")
 
 @app.route("/generate")
@@ -112,14 +113,15 @@ def content_tool(tool):
         return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/content/{tool}'>Generate More</a>", "/content")
     body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
     return page(name, body, "/content")
+
 REACH_TOOLS = {
-    "leads": ("Leads", "target audience or niche", "Generate 10 specific types of potential customers or leads for someone selling: {i}. For each: describe who they are, where to find them online, and what pain point they have. Be specific and actionable."),
-    "community": ("Community", "topic or product", "List 10 online communities (subreddits, Discord servers, Facebook groups, forums) where people interested in: {i} hang out. For each: name, platform, estimated size, and one tip for engaging authentically."),
-    "email": ("Email", "product and target customer", "Write 3 cold outreach email variations for: {i}. Each email: subject line, 3-4 sentence body, CTA. Friendly, not spammy, focused on value."),
-    "inbox": ("Inbox Reply", "message you received", "Write 3 professional reply options for this message: {i}. One formal, one friendly, one brief. Ready to send."),
-    "analytics": ("Analytics", "platform and content type", "Create an analytics tracking plan for: {i}. List 5 key metrics to track, how to measure each, and what good vs bad numbers look like."),
-    "research": ("Research", "topic or question", "Research and summarize everything important about: {i}. Key facts, trends, opportunities, risks, and 3 actionable insights. Cite what you know up to your training date."),
-    "autopost": ("AutoPost Plan", "platform and content niche", "Create a 7-day social media posting plan for: {i}. For each day: best time to post, post type, sample caption, and hashtags.")
+    "leads": ("Leads", "target audience or niche", "Generate 10 specific types of potential customers for someone selling: {i}. For each: who they are, where to find them online, and their main pain point."),
+    "community": ("Community", "topic or product", "List 10 online communities (subreddits, Discord, Facebook groups, forums) for people interested in: {i}. For each: name, platform, size estimate, and one engagement tip."),
+    "email": ("Email", "product and target customer", "Write 3 cold outreach email variations for: {i}. Each: subject line, 3-4 sentence body, CTA. Friendly, not spammy, value-focused."),
+    "inbox": ("Inbox Reply", "message you received", "Write 3 reply options for this message: {i}. One formal, one friendly, one brief. Ready to send."),
+    "analytics": ("Analytics", "platform and content type", "Create an analytics tracking plan for: {i}. List 5 key metrics, how to measure each, and what good vs bad numbers look like."),
+    "research": ("Research", "topic or question", "Research and summarize: {i}. Key facts, trends, opportunities, risks, and 3 actionable insights."),
+    "autopost": ("AutoPost Plan", "platform and niche", "Create a 7-day social media posting plan for: {i}. Each day: best time, post type, sample caption, hashtags.")
 }
 
 @app.route("/reach")
@@ -138,5 +140,6 @@ def reach_tool(tool):
         return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/reach/{tool}'>Generate More</a>", "/reach")
     body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
     return page(name, body, "/reach")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
