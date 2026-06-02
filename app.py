@@ -14,7 +14,7 @@ def ai(prompt):
     return r.choices[0].message.content
 
 def page(title, body, back="/"):
-    return f"<html><head><title>{title}</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff}}input,textarea{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;box-sizing:border-box}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0}}a{{color:#ff4444;text-decoration:none}}.btn{{display:inline-block;padding:10px 20px;color:#fff;border-radius:5px;margin:5px}}</style></head><body>{body}<br><a href='{back}'>← Back</a></body></html>"
+    return f"<html><head><title>{title}</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff}}input,textarea,select{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;box-sizing:border-box}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0}}a{{color:#ff4444;text-decoration:none}}.btn{{display:inline-block;padding:10px 20px;color:#fff;border-radius:5px;margin:5px}}.invoice{{background:#1a1a1a;padding:20px;border-radius:8px;border:1px solid #333}}</style></head><body>{body}<br><a href='{back}'>← Back</a></body></html>"
 
 @app.route("/")
 def home():
@@ -26,6 +26,7 @@ def home():
     body += "<a href='/dougbot' class='btn' style='background:#6b0000'>DougBot</a>"
     body += "<a href='/reach' class='btn' style='background:#0a3d0a'>REACH</a>"
     body += "<a href='/brain' class='btn' style='background:#3d2800'>BRAIN</a>"
+    body += "<a href='/earn' class='btn' style='background:#1a4a1a'>EARN</a>"
     return page("Cash.bot", body, "/")
 
 @app.route("/generate")
@@ -168,6 +169,52 @@ def brain_tool(tool):
         return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/brain/{tool}'>Ask Again</a>", "/brain")
     body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
     return page(name, body, "/brain")
+
+@app.route("/earn")
+def earn():
+    body = "<h1>EARN</h1>"
+    body += "<a href='/earn/pay' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💳 Pay — Generate invoices and payment requests</a>"
+    return page("EARN", body)
+
+@app.route("/earn/pay", methods=["GET", "POST"])
+def earn_pay():
+    if request.method == "POST":
+        your_name = request.form.get("your_name", "")
+        client_name = request.form.get("client_name", "")
+        service = request.form.get("service", "")
+        amount = request.form.get("amount", "")
+        due_date = request.form.get("due_date", "")
+        payment_method = request.form.get("payment_method", "")
+        invoice = f"""
+        <div class='invoice'>
+            <h2>INVOICE</h2>
+            <p><strong>From:</strong> {your_name}</p>
+            <p><strong>To:</strong> {client_name}</p>
+            <hr style='border-color:#333'>
+            <p><strong>Service:</strong> {service}</p>
+            <p><strong>Amount Due:</strong> ${amount}</p>
+            <p><strong>Due Date:</strong> {due_date}</p>
+            <p><strong>Payment Method:</strong> {payment_method}</p>
+            <hr style='border-color:#333'>
+            <p style='color:#aaa;font-size:0.9em'>Thank you for your business.</p>
+        </div>
+        <br>
+        <button onclick='window.print()' style='background:#1a4a1a'>🖨️ Print / Save as PDF</button>
+        """
+        return page("Invoice", f"<h1>💳 Invoice Generated</h1>{invoice}", "/earn/pay")
+    body = """
+    <h1>💳 Pay — Invoice Generator</h1>
+    <form method='post'>
+        <input name='your_name' placeholder='Your name or business name'/>
+        <input name='client_name' placeholder='Client name'/>
+        <input name='service' placeholder='Service provided (e.g. 30 social media posts)'/>
+        <input name='amount' placeholder='Amount (e.g. 50)'/>
+        <input name='due_date' placeholder='Due date (e.g. June 15, 2026)'/>
+        <input name='payment_method' placeholder='Payment method (e.g. PayPal, Venmo, Cash App)'/>
+        <button type='submit'>Generate Invoice</button>
+    </form>
+    """
+    return page("Pay", body, "/earn")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
