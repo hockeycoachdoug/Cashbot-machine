@@ -1,9 +1,12 @@
 import os
 import subprocess
-from flask import Flask, request
+from flask import Flask, request, session, redirect
 from openai import OpenAI
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("DASHBOARD_PASSWORD", "changeme")
+
+PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "changeme")
 
 def ai(prompt):
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -16,69 +19,22 @@ def ai(prompt):
 def page(title, body, back="/"):
     return f"<html><head><title>{title}</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#0a0a0a;color:#fff}}input,textarea,select{{width:100%;padding:12px;font-size:1em;border-radius:8px;border:none;margin:10px 0;box-sizing:border-box}}button{{width:100%;padding:14px;background:#ff4444;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer}}pre{{background:#1a1a1a;padding:15px;border-radius:8px;white-space:pre-wrap;color:#0f0}}a{{color:#ff4444;text-decoration:none}}.btn{{display:inline-block;padding:10px 20px;color:#fff;border-radius:5px;margin:5px}}.card{{background:#1a1a1a;padding:20px;border-radius:8px;border:1px solid #333;margin:10px 0}}</style></head><body>{body}<br><a href='{back}'>← Back</a></body></html>"
 
-@app.route("/")
-def home():
-    body = "<h1>Cash.bot Machine</h1><p>Status: <strong>Online</strong></p><h2>Tools</h2>"
-    body += "<a href='/generate' class='btn' style='background:#000'>Generate Posts</a>"
-    body += "<a href='/terminal' class='btn' style='background:#1a1a2e'>Terminal</a>"
-    body += "<a href='/files' class='btn' style='background:#16213e'>Files</a>"
-    body += "<a href='/content' class='btn' style='background:#2d1b69'>Content</a>"
-    body += "<a href='/dougbot' class='btn' style='background:#6b0000'>DougBot</a>"
-    body += "<a href='/reach' class='btn' style='background:#0a3d0a'>REACH</a>"
-    body += "<a href='/brain' class='btn' style='background:#3d2800'>BRAIN</a>"
-    body += "<a href='/earn' class='btn' style='background:#1a4a1a'>EARN</a>"
-    return page("Cash.bot", body, "/")
+def auth_required():
+    return session.get("authenticated") != True
 
-@app.route("/generate")
-def generate():
-    result = subprocess.run(["python", "content_engine.py"], capture_output=True, text=True)
-    output = result.stdout or result.stderr
-    return page("Generate", f"<h1>Generated Posts</h1><pre>{output}</pre>")
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        if request.form.get("password") == PASSWORD:
+            session["authenticated"] = True
+            return redirect("/")
+        return page("Login", "<h1>Login</h1><p style='color:#ff4444'>Wrong password. Try again.</p><form method='post'><input name='password' type='password' placeholder='Password'/><button type='submit'>Login</button></form>", "/login")
+    return page("Login", "<h1>Cash.bot Machine</h1><p>Enter your password to continue.</p><form method='post'><input name='password' type='password' placeholder='Password'/><button type='submit'>Login</button></form>", "/login")
 
-@app.route("/terminal")
-def terminal():
-    body = "<h1>Terminal</h1><form method='post' action='/run'><input name='cmd' placeholder='Enter command...'/><button type='submit'>Run</button></form>"
-    return page("Terminal", body)
-
-@app.route("/run", methods=["POST"])
-def run():
-    cmd = request.form.get("cmd", "")
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    output = result.stdout or result.stderr
-    return page("Output", f"<h1>Output</h1><pre>{output}</pre>", "/terminal")
-
-@app.route("/files")
-def files():
-    result = subprocess.run("ls /app", shell=True, capture_output=True, text=True)
-    file_list = result.stdout.strip().split("\n")
-    links = "".join([f"<li><a href='/files/{f}'>{f}</a></li>" for f in file_list])
-    return page("Files", f"<h1>Files</h1><ul>{links}</ul>")
-
-@app.route("/files/<path:filename>")
-def view_file(filename):
-    try:
-        content = open(f"/app/{filename}").read()
-        body = f"<h1>{filename}</h1><pre>{content}</pre><a href='/edit/{filename}' class='btn' style='background:#000'>Edit</a>"
-        return page(filename, body, "/files")
-    except Exception as e:
-        return page("Error", f"<p>{e}</p>", "/files")
-
-@app.route("/edit/<path:filename>")
-def edit_file(filename):
-    try:
-        content = open(f"/app/{filename}").read()
-        body = f"<h1>Edit: {filename}</h1><form method='post' action='/save/{filename}'><textarea name='content' style='height:60vh'>{content}</textarea><button type='submit'>Save</button></form>"
-        return page(filename, body, f"/files/{filename}")
-    except Exception as e:
-        return page("Error", f"<p>{e}</p>", "/files")
-
-@app.route("/save/<path:filename>", methods=["POST"])
-def save_file(filename):
-    try:
-        open(f"/app/{filename}", "w").write(request.form.get("content", ""))
-        return page("Saved", f"<h1>Saved</h1><p>{filename} saved.</p><a href='/files/{filename}'>View</a>", "/files")
-    except Exception as e:
-        return page("Error", f"<p>{e}</p>", "/files")
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
 
 @app.route("/dougbot", methods=["GET", "POST"])
 def dougbot():
@@ -88,6 +44,80 @@ def dougbot():
         return page("DougBot", f"<h1>DougBot</h1><pre>{posts}</pre><a href='/dougbot'>Generate More</a>")
     body = "<h1>DougBot</h1><p>Political satire posts, generated instantly.</p><form method='post'><input name='topic' placeholder='e.g. Trump, NATO, Congress...'/><button type='submit'>Generate 10 Posts</button></form>"
     return page("DougBot", body)
+
+@app.route("/")
+def home():
+    if auth_required():
+        return redirect("/login")
+    body = "<h1>Cash.bot Machine</h1><p>Status: <strong>Online</strong></p><h2>Tools</h2>"
+    body += "<a href='/generate' class='btn' style='background:#000'>Generate Posts</a>"
+    body += "<a href='/terminal' class='btn' style='background:#1a1a2e'>Terminal</a>"
+    body += "<a href='/files' class='btn' style='background:#16213e'>Files</a>"
+    body += "<a href='/content' class='btn' style='background:#2d1b69'>Content</a>"
+    body += "<a href='/dougbot' class='btn' style='background:#6b0000'>DougBot</a>"
+    body += "<a href='/reach' class='btn' style='background:#0a3d0a'>REACH</a>"
+    body += "<a href='/brain' class='btn' style='background:#3d2800'>BRAIN</a>"
+    body += "<a href='/earn' class='btn' style='background:#1a4a1a'>EARN</a>"
+    body += "<br><br><a href='/logout' style='color:#666;font-size:0.9em'>Logout</a>"
+    return page("Cash.bot", body, "/")
+
+@app.route("/generate")
+def generate():
+    if auth_required(): return redirect("/login")
+    result = subprocess.run(["python", "content_engine.py"], capture_output=True, text=True)
+    output = result.stdout or result.stderr
+    return page("Generate", f"<h1>Generated Posts</h1><pre>{output}</pre>")
+
+@app.route("/terminal")
+def terminal():
+    if auth_required(): return redirect("/login")
+    body = "<h1>Terminal</h1><form method='post' action='/run'><input name='cmd' placeholder='Enter command...'/><button type='submit'>Run</button></form>"
+    return page("Terminal", body)
+
+@app.route("/run", methods=["POST"])
+def run():
+    if auth_required(): return redirect("/login")
+    cmd = request.form.get("cmd", "")
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    output = result.stdout or result.stderr
+    return page("Output", f"<h1>Output</h1><pre>{output}</pre>", "/terminal")
+
+@app.route("/files")
+def files():
+    if auth_required(): return redirect("/login")
+    result = subprocess.run("ls /app", shell=True, capture_output=True, text=True)
+    file_list = result.stdout.strip().split("\n")
+    links = "".join([f"<li><a href='/files/{f}'>{f}</a></li>" for f in file_list])
+    return page("Files", f"<h1>Files</h1><ul>{links}</ul>")
+
+@app.route("/files/<path:filename>")
+def view_file(filename):
+    if auth_required(): return redirect("/login")
+    try:
+        content = open(f"/app/{filename}").read()
+        body = f"<h1>{filename}</h1><pre>{content}</pre><a href='/edit/{filename}' class='btn' style='background:#000'>Edit</a>"
+        return page(filename, body, "/files")
+    except Exception as e:
+        return page("Error", f"<p>{e}</p>", "/files")
+
+@app.route("/edit/<path:filename>")
+def edit_file(filename):
+    if auth_required(): return redirect("/login")
+    try:
+        content = open(f"/app/{filename}").read()
+        body = f"<h1>Edit: {filename}</h1><form method='post' action='/save/{filename}'><textarea name='content' style='height:60vh'>{content}</textarea><button type='submit'>Save</button></form>"
+        return page(filename, body, f"/files/{filename}")
+    except Exception as e:
+        return page("Error", f"<p>{e}</p>", "/files")
+
+@app.route("/save/<path:filename>", methods=["POST"])
+def save_file(filename):
+    if auth_required(): return redirect("/login")
+    try:
+        open(f"/app/{filename}", "w").write(request.form.get("content", ""))
+        return page("Saved", f"<h1>Saved</h1><p>{filename} saved.</p><a href='/files/{filename}'>View</a>", "/files")
+    except Exception as e:
+        return page("Error", f"<p>{e}</p>", "/files")
 
 TOOLS = {
     "viralshorts": ("ViralShorts", "topic", "Write 3 TikTok/Reels style video scripts about: {i}. Each: hook (1 line), body (3-4 lines), CTA (1 line). Punchy and viral."),
@@ -101,11 +131,13 @@ TOOLS = {
 
 @app.route("/content")
 def content():
+    if auth_required(): return redirect("/login")
     links = "".join([f"<a href='/content/{k}' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>{v[0]}</a>" for k, v in TOOLS.items()])
     return page("Content Tools", f"<h1>Content Tools</h1>{links}")
 
 @app.route("/content/<tool>", methods=["GET", "POST"])
 def content_tool(tool):
+    if auth_required(): return redirect("/login")
     if tool not in TOOLS:
         return page("Error", "<p>Tool not found</p>", "/content")
     name, placeholder, prompt = TOOLS[tool]
@@ -128,11 +160,13 @@ REACH_TOOLS = {
 
 @app.route("/reach")
 def reach():
+    if auth_required(): return redirect("/login")
     links = "".join([f"<a href='/reach/{k}' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>{v[0]}</a>" for k, v in REACH_TOOLS.items()])
     return page("REACH", f"<h1>REACH Tools</h1>{links}")
 
 @app.route("/reach/<tool>", methods=["GET", "POST"])
 def reach_tool(tool):
+    if auth_required(): return redirect("/login")
     if tool not in REACH_TOOLS:
         return page("Error", "<p>Tool not found</p>", "/reach")
     name, placeholder, prompt = REACH_TOOLS[tool]
@@ -155,11 +189,13 @@ BRAIN_TOOLS = {
 
 @app.route("/brain")
 def brain():
+    if auth_required(): return redirect("/login")
     links = "".join([f"<a href='/brain/{k}' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>{v[0]}</a>" for k, v in BRAIN_TOOLS.items()])
     return page("BRAIN", f"<h1>BRAIN Tools</h1>{links}")
 
 @app.route("/brain/<tool>", methods=["GET", "POST"])
 def brain_tool(tool):
+    if auth_required(): return redirect("/login")
     if tool not in BRAIN_TOOLS:
         return page("Error", "<p>Tool not found</p>", "/brain")
     name, placeholder, prompt = BRAIN_TOOLS[tool]
@@ -172,6 +208,7 @@ def brain_tool(tool):
 
 @app.route("/earn")
 def earn():
+    if auth_required(): return redirect("/login")
     body = "<h1>EARN</h1>"
     body += "<a href='/earn/pay' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💳 Pay — Invoice generator</a>"
     body += "<a href='/earn/wallet' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>👛 Wallet — Track your crypto addresses</a>"
@@ -181,6 +218,7 @@ def earn():
 
 @app.route("/earn/pay", methods=["GET", "POST"])
 def earn_pay():
+    if auth_required(): return redirect("/login")
     if request.method == "POST":
         your_name = request.form.get("your_name", "")
         client_name = request.form.get("client_name", "")
@@ -195,6 +233,7 @@ def earn_pay():
 
 @app.route("/earn/wallet", methods=["GET", "POST"])
 def earn_wallet():
+    if auth_required(): return redirect("/login")
     if request.method == "POST":
         coin = request.form.get("coin", "")
         address = request.form.get("address", "")
@@ -206,16 +245,18 @@ def earn_wallet():
 
 @app.route("/earn/faucet")
 def earn_faucet():
+    if auth_required(): return redirect("/login")
     faucets = ai("List 10 legitimate free crypto faucets that are currently active. For each: name, URL, which coin they give, how often you can claim, and estimated earnings per day. Be honest about amounts - they are small.")
-    return page("FaucetHub", f"<h1>🚰 FaucetHub</h1><p>Free crypto faucets you can use right now:</p><pre>{faucets}</pre>", "/earn")
+    return page("FaucetHub", f"<h1>🚰 FaucetHub</h1><pre>{faucets}</pre>", "/earn")
 
 @app.route("/earn/trade", methods=["GET", "POST"])
 def earn_trade():
+    if auth_required(): return redirect("/login")
     if request.method == "POST":
         strategy = request.form.get("strategy", "")
         output = ai(f"Analyze this trading strategy and give detailed feedback: {strategy}. Include: strengths, weaknesses, risk level, potential improvements, and a realistic assessment of profitability. Be honest.")
         return page("Trade", f"<h1>📈 Strategy Analysis</h1><pre>{output}</pre><a href='/earn/trade'>Analyze Another</a>", "/earn")
-    body = "<h1>📈 Trade Analyzer</h1><p>Describe a trading strategy and get AI analysis.</p><form method='post'><textarea name='strategy' placeholder='Describe your trading strategy... (e.g. Buy Bitcoin when RSI drops below 30, sell when it hits 70)' style='height:150px'></textarea><button type='submit'>Analyze Strategy</button></form>"
+    body = "<h1>📈 Trade Analyzer</h1><form method='post'><textarea name='strategy' placeholder='Describe your trading strategy...' style='height:150px'></textarea><button type='submit'>Analyze Strategy</button></form>"
     return page("Trade", body, "/earn")
 
 if __name__ == "__main__":
