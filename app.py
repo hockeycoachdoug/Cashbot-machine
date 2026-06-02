@@ -112,6 +112,31 @@ def content_tool(tool):
         return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/content/{tool}'>Generate More</a>", "/content")
     body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
     return page(name, body, "/content")
+REACH_TOOLS = {
+    "leads": ("Leads", "target audience or niche", "Generate 10 specific types of potential customers or leads for someone selling: {i}. For each: describe who they are, where to find them online, and what pain point they have. Be specific and actionable."),
+    "community": ("Community", "topic or product", "List 10 online communities (subreddits, Discord servers, Facebook groups, forums) where people interested in: {i} hang out. For each: name, platform, estimated size, and one tip for engaging authentically."),
+    "email": ("Email", "product and target customer", "Write 3 cold outreach email variations for: {i}. Each email: subject line, 3-4 sentence body, CTA. Friendly, not spammy, focused on value."),
+    "inbox": ("Inbox Reply", "message you received", "Write 3 professional reply options for this message: {i}. One formal, one friendly, one brief. Ready to send."),
+    "analytics": ("Analytics", "platform and content type", "Create an analytics tracking plan for: {i}. List 5 key metrics to track, how to measure each, and what good vs bad numbers look like."),
+    "research": ("Research", "topic or question", "Research and summarize everything important about: {i}. Key facts, trends, opportunities, risks, and 3 actionable insights. Cite what you know up to your training date."),
+    "autopost": ("AutoPost Plan", "platform and content niche", "Create a 7-day social media posting plan for: {i}. For each day: best time to post, post type, sample caption, and hashtags.")
+}
 
+@app.route("/reach")
+def reach():
+    links = "".join([f"<a href='/reach/{k}' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>{v[0]}</a>" for k, v in REACH_TOOLS.items()])
+    return page("REACH", f"<h1>REACH Tools</h1>{links}")
+
+@app.route("/reach/<tool>", methods=["GET", "POST"])
+def reach_tool(tool):
+    if tool not in REACH_TOOLS:
+        return page("Error", "<p>Tool not found</p>", "/reach")
+    name, placeholder, prompt = REACH_TOOLS[tool]
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        output = ai(prompt.replace("{i}", user_input))
+        return page(name, f"<h1>{name}</h1><pre>{output}</pre><a href='/reach/{tool}'>Generate More</a>", "/reach")
+    body = f"<h1>{name}</h1><form method='post'><input name='input' placeholder='Enter {placeholder}...'/><button type='submit'>Generate</button></form>"
+    return page(name, body, "/reach")
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
