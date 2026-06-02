@@ -77,13 +77,12 @@ def edit_file(filename):
     except Exception as e:
         return f"<h1>Error</h1><p>{str(e)}</p><br><a href='/files'>← Files</a>"
 
-@app.route("/save/<path:filename>", methods=["POST"])
-def save_file(filename):
+@app.route("/files/<path:filename>")
+def view_file(filename):
     try:
-        content = request.form.get("content", "")
-        with open(f"/app/{filename}", "w") as f:
-            f.write(content)
-        return f"<h1>✅ Saved</h1><p>{filename} saved successfully.</p><br><a href='/files/{filename}'>View File</a> | <a href='/files'>← Files</a>"
+        with open(f"/app/{filename}", "r") as f:
+            content = f.read()
+        return f"<h1>📄 {filename}</h1><pre>{content}</pre><a href='/edit/{filename}' style='padding:10px 20px;background:#000;color:#fff;text-decoration:none;border-radius:5px;'>✏️ Edit</a> <a href='/files'>← Files</a>"
     except Exception as e:
         return f"<h1>Error</h1><p>{str(e)}</p><br><a href='/files'>← Files</a>"  
 if __name__ == "__main__":
