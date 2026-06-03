@@ -57,6 +57,7 @@ def home():
     body += "<a href='/brain' class='btn' style='background:#3d2800'>BRAIN</a>"
     body += "<a href='/earn' class='btn' style='background:#1a4a1a'>EARN</a>"
     body += "<a href='/ebay' class='btn' style='background:#0064d2'>eBay Lister</a>"
+    body += "<a href='/fbmarket' class='btn' style='background:#1877f2'>FB Marketplace</a>"
     body += "<br><br><a href='/logout' style='color:#666;font-size:0.9em'>Logout</a>"
     return page("Cash.bot", body, "/")
 
@@ -125,36 +126,23 @@ def ebay():
         item = request.form.get("item", "")
         condition = request.form.get("condition", "")
         details = request.form.get("details", "")
-        output = ai(f"""You are an expert eBay seller. Create a complete eBay listing for this item:
-Item: {item}
-Condition: {condition}
-Details: {details}
-
-Provide:
-1. TITLE (80 chars max, keyword-rich)
-2. DESCRIPTION (compelling, bullet points, includes condition and what's included)
-3. SUGGESTED PRICE (research typical sold prices, give a range and recommended listing price)
-4. CATEGORY (eBay category path)
-5. SHIPPING (recommended shipping method and estimated cost)
-6. PRO TIPS (2-3 tips to sell this item faster)
-
-Be specific and realistic.""")
+        output = ai(f"You are an expert eBay seller. Create a complete eBay listing for: Item: {item}, Condition: {condition}, Details: {details}. Provide: 1. TITLE (80 chars max, keyword-rich) 2. DESCRIPTION (compelling, bullet points) 3. SUGGESTED PRICE (typical sold prices, recommended listing price) 4. CATEGORY (eBay category path) 5. SHIPPING (recommended method and cost) 6. PRO TIPS (2-3 tips to sell faster). Be specific and realistic.")
         return page("eBay Listing", f"<h1>eBay Listing Ready</h1><pre>{output}</pre><a href='/ebay'>List Another Item</a>", "/ebay")
-    body = """<h1>🛒 eBay Listing Generator</h1>
-    <p>Describe your item and get a complete ready-to-paste eBay listing.</p>
-    <form method='post'>
-        <input name='item' placeholder='Item name (e.g. Magical Butter Machine MB2e)'/>
-        <select name='condition'>
-            <option value='Like New'>Like New</option>
-            <option value='Very Good'>Very Good</option>
-            <option value='Good'>Good</option>
-            <option value='Acceptable'>Acceptable</option>
-            <option value='For Parts'>For Parts / Not Working</option>
-        </select>
-        <textarea name='details' placeholder='Extra details: what is included, any defects, original box, accessories, age of item...' style='height:120px'></textarea>
-        <button type='submit'>Generate eBay Listing</button>
-    </form>"""
+    body = "<h1>eBay Listing Generator</h1><p>Describe your item and get a complete ready-to-paste eBay listing.</p><form method='post'><input name='item' placeholder='Item name (e.g. Magical Butter Machine MB2e)'/><select name='condition'><option>Like New</option><option>Very Good</option><option>Good</option><option>Acceptable</option><option>For Parts</option></select><textarea name='details' placeholder='Extra details: what is included, any defects, original box, accessories...' style='height:120px'></textarea><button type='submit'>Generate eBay Listing</button></form>"
     return page("eBay Lister", body, "/")
+
+@app.route("/fbmarket", methods=["GET", "POST"])
+def fbmarket():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        item = request.form.get("item", "")
+        condition = request.form.get("condition", "")
+        details = request.form.get("details", "")
+        price = request.form.get("price", "")
+        output = ai(f"Create a Facebook Marketplace listing for: Item: {item}, Condition: {condition}, Price: ${price}, Details: {details}. Include: 1. TITLE (short, catchy, local-friendly) 2. DESCRIPTION (3-4 sentences, casual friendly tone, mention condition and what is included) 3. CATEGORY (best FB Marketplace category) 4. PRICE TIPS (is this price right? what range sells fastest?) 5. THREE TIPS to sell faster locally 6. MEETUP SAFETY TIPS (where to meet, what to do). Keep it friendly and practical.")
+        return page("FB Marketplace", f"<h1>Facebook Marketplace Listing</h1><pre>{output}</pre><a href='/fbmarket'>List Another</a>", "/fbmarket")
+    body = "<h1>Facebook Marketplace Generator</h1><p>Get a ready-to-paste local listing in seconds.</p><form method='post'><input name='item' placeholder='Item name'/><select name='condition'><option>New</option><option>Like New</option><option>Good</option><option>Fair</option><option>Poor</option></select><input name='price' placeholder='Your asking price (e.g. 75)'/><textarea name='details' placeholder='Extra details: color, size, what is included, reason for selling...' style='height:100px'></textarea><button type='submit'>Generate Listing</button></form>"
+    return page("FB Marketplace", body, "/")
 
 TOOLS = {
     "viralshorts": ("ViralShorts", "topic", "Write 3 TikTok/Reels style video scripts about: {i}. Each: hook (1 line), body (3-4 lines), CTA (1 line). Punchy and viral."),
