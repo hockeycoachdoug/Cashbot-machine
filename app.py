@@ -59,6 +59,7 @@ def home():
     body += "<a href='/ebay' class='btn' style='background:#0064d2'>eBay Lister</a>"
     body += "<a href='/fbmarket' class='btn' style='background:#1877f2'>FB Marketplace</a>"
     body += "<a href='/sell' class='btn' style='background:#e44d26'>Selling Tools</a>"
+    body += "<a href='/hockey' class='btn' style='background:#00457c'>Hockey Coach</a>"
     body += "<br><br><a href='/logout' style='color:#666;font-size:0.9em'>Logout</a>"
     return page("Cash.bot", body, "/")
 
@@ -129,7 +130,7 @@ def ebay():
         details = request.form.get("details", "")
         output = ai(f"You are an expert eBay seller. Create a complete eBay listing for: Item: {item}, Condition: {condition}, Details: {details}. Provide: 1. TITLE (80 chars max, keyword-rich) 2. DESCRIPTION (compelling, bullet points) 3. SUGGESTED PRICE (typical sold prices, recommended listing price) 4. CATEGORY (eBay category path) 5. SHIPPING (recommended method and cost) 6. PRO TIPS (2-3 tips to sell faster). Be specific and realistic.")
         return page("eBay Listing", f"<h1>eBay Listing Ready</h1><pre>{output}</pre><a href='/ebay'>List Another Item</a>", "/ebay")
-    body = "<h1>eBay Listing Generator</h1><form method='post'><input name='item' placeholder='Item name'/><select name='condition'><option>Like New</option><option>Very Good</option><option>Good</option><option>Acceptable</option><option>For Parts</option></select><textarea name='details' placeholder='Extra details: what is included, any defects, accessories...' style='height:120px'></textarea><button type='submit'>Generate eBay Listing</button></form>"
+    body = "<h1>eBay Listing Generator</h1><form method='post'><input name='item' placeholder='Item name'/><select name='condition'><option>Like New</option><option>Very Good</option><option>Good</option><option>Acceptable</option><option>For Parts</option></select><textarea name='details' placeholder='Extra details...' style='height:120px'></textarea><button type='submit'>Generate eBay Listing</button></form>"
     return page("eBay Lister", body, "/")
 
 @app.route("/fbmarket", methods=["GET", "POST"])
@@ -148,11 +149,11 @@ def fbmarket():
 @app.route("/sell")
 def sell():
     if auth_required(): return redirect("/login")
-    body = "<h1>🛒 Selling Tools</h1>"
+    body = "<h1>Selling Tools</h1>"
     body += "<a href='/sell/craigslist' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📋 Craigslist Generator</a>"
-    body += "<a href='/sell/pricecheck' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💲 Price Research — What does it actually sell for?</a>"
-    body += "<a href='/sell/bulklister' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📦 Bulk Lister — List 10 items at once</a>"
-    body += "<a href='/sell/negotiator' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🤝 Offer Negotiator — Counter lowball offers</a>"
+    body += "<a href='/sell/pricecheck' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💲 Price Research</a>"
+    body += "<a href='/sell/bulklister' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📦 Bulk Lister</a>"
+    body += "<a href='/sell/negotiator' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🤝 Offer Negotiator</a>"
     return page("Selling Tools", body)
 
 @app.route("/sell/craigslist", methods=["GET", "POST"])
@@ -163,9 +164,9 @@ def craigslist():
         price = request.form.get("price", "")
         location = request.form.get("location", "")
         details = request.form.get("details", "")
-        output = ai(f"Create a Craigslist listing for: Item: {item}, Price: ${price}, Location: {location}, Details: {details}. Include: 1. TITLE (short, clear, no caps abuse) 2. DESCRIPTION (honest, straightforward, Craigslist style — no fluff) 3. BEST CATEGORY to post in 4. PRICE TIP (is this priced right for Craigslist?) 5. TWO SAFETY TIPS for Craigslist transactions. Keep it simple and direct.")
+        output = ai(f"Create a Craigslist listing for: Item: {item}, Price: ${price}, Location: {location}, Details: {details}. Include: 1. TITLE 2. DESCRIPTION (honest, straightforward) 3. BEST CATEGORY 4. PRICE TIP 5. TWO SAFETY TIPS.")
         return page("Craigslist", f"<h1>Craigslist Listing Ready</h1><pre>{output}</pre><a href='/sell/craigslist'>List Another</a>", "/sell")
-    body = "<h1>📋 Craigslist Generator</h1><form method='post'><input name='item' placeholder='Item name'/><input name='price' placeholder='Asking price (e.g. 75)'/><input name='location' placeholder='Your city or area'/><textarea name='details' placeholder='Condition, what is included, any defects...' style='height:100px'></textarea><button type='submit'>Generate Listing</button></form>"
+    body = "<h1>📋 Craigslist Generator</h1><form method='post'><input name='item' placeholder='Item name'/><input name='price' placeholder='Asking price'/><input name='location' placeholder='Your city or area'/><textarea name='details' placeholder='Condition, what is included...' style='height:100px'></textarea><button type='submit'>Generate Listing</button></form>"
     return page("Craigslist", body, "/sell")
 
 @app.route("/sell/pricecheck", methods=["GET", "POST"])
@@ -174,9 +175,9 @@ def pricecheck():
     if request.method == "POST":
         item = request.form.get("item", "")
         condition = request.form.get("condition", "")
-        output = ai(f"You are an expert reseller. Research realistic sold prices for: {item} in {condition} condition. Provide: 1. EBAY SOLD PRICE RANGE (low to high, typical) 2. FACEBOOK MARKETPLACE RANGE 3. CRAIGSLIST RANGE 4. BEST PLATFORM to sell this item and why 5. RECOMMENDED LISTING PRICE to sell within 7 days 6. ANY TIPS specific to selling this item. Be honest and specific based on real market knowledge.")
-        return page("Price Research", f"<h1>💲 Price Research Results</h1><pre>{output}</pre><a href='/sell/pricecheck'>Check Another Item</a>", "/sell")
-    body = "<h1>💲 Price Research</h1><p>Find out what your item actually sells for before listing it.</p><form method='post'><input name='item' placeholder='Item name (e.g. iPhone 13, Air Jordan 11, Vitamix blender)'/><select name='condition'><option>Like New</option><option>Very Good</option><option>Good</option><option>Fair</option><option>For Parts</option></select><button type='submit'>Research Price</button></form>"
+        output = ai(f"You are an expert reseller. Research realistic sold prices for: {item} in {condition} condition. Provide: 1. EBAY SOLD PRICE RANGE 2. FACEBOOK MARKETPLACE RANGE 3. CRAIGSLIST RANGE 4. BEST PLATFORM to sell and why 5. RECOMMENDED LISTING PRICE to sell within 7 days 6. TIPS specific to selling this item.")
+        return page("Price Research", f"<h1>Price Research Results</h1><pre>{output}</pre><a href='/sell/pricecheck'>Check Another</a>", "/sell")
+    body = "<h1>💲 Price Research</h1><form method='post'><input name='item' placeholder='Item name'/><select name='condition'><option>Like New</option><option>Very Good</option><option>Good</option><option>Fair</option><option>For Parts</option></select><button type='submit'>Research Price</button></form>"
     return page("Price Research", body, "/sell")
 
 @app.route("/sell/bulklister", methods=["GET", "POST"])
@@ -185,9 +186,9 @@ def bulklister():
     if request.method == "POST":
         items = request.form.get("items", "")
         platform = request.form.get("platform", "")
-        output = ai(f"You are an expert reseller. Create ready-to-post {platform} listings for each of these items: {items}. For each item provide: TITLE, one-paragraph DESCRIPTION, and SUGGESTED PRICE. Separate each listing clearly with the item name as a header. Be specific and realistic with prices.")
-        return page("Bulk Lister", f"<h1>📦 Bulk Listings Ready</h1><pre>{output}</pre><a href='/sell/bulklister'>List More Items</a>", "/sell")
-    body = "<h1>📦 Bulk Lister</h1><p>Describe up to 10 items — get all listings generated at once.</p><form method='post'><textarea name='items' placeholder='List your items, one per line. Include condition. Example:\nNike Air Max size 10, good condition\niPad mini 3rd gen, cracked screen\nKitchenAid mixer, like new with attachments' style='height:200px'></textarea><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option></select><button type='submit'>Generate All Listings</button></form>"
+        output = ai(f"Create ready-to-post {platform} listings for each of these items: {items}. For each: TITLE, one-paragraph DESCRIPTION, and SUGGESTED PRICE. Separate each listing clearly with the item name as a header.")
+        return page("Bulk Lister", f"<h1>Bulk Listings Ready</h1><pre>{output}</pre><a href='/sell/bulklister'>List More</a>", "/sell")
+    body = "<h1>📦 Bulk Lister</h1><form method='post'><textarea name='items' placeholder='One item per line with condition. Example:\nNike Air Max size 10, good condition\niPad mini 3rd gen, cracked screen\nKitchenAid mixer, like new' style='height:200px'></textarea><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option></select><button type='submit'>Generate All Listings</button></form>"
     return page("Bulk Lister", body, "/sell")
 
 @app.route("/sell/negotiator", methods=["GET", "POST"])
@@ -198,10 +199,73 @@ def negotiator():
         asking = request.form.get("asking", "")
         offer = request.form.get("offer", "")
         platform = request.form.get("platform", "")
-        output = ai(f"I am selling a {item} for ${asking} on {platform}. A buyer offered ${offer}. Write 3 counter-offer responses: 1. FIRM response (politely hold price) 2. FLEXIBLE response (meet in the middle) 3. FINAL OFFER response (lowest you should go with reasoning). Each response should be short, friendly, and ready to send. Also tell me: is their offer reasonable or a lowball? What is a fair final price?")
-        return page("Negotiator", f"<h1>🤝 Counter-Offer Responses</h1><pre>{output}</pre><a href='/sell/negotiator'>New Negotiation</a>", "/sell")
-    body = "<h1>🤝 Offer Negotiator</h1><p>Got a lowball offer? Get 3 ready-to-send counter responses.</p><form method='post'><input name='item' placeholder='What are you selling?'/><input name='asking' placeholder='Your asking price (e.g. 100)'/><input name='offer' placeholder='Their offer (e.g. 60)'/><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option><option>Other</option></select><button type='submit'>Generate Counter Offers</button></form>"
+        output = ai(f"I am selling a {item} for ${asking} on {platform}. A buyer offered ${offer}. Write 3 counter-offer responses: 1. FIRM (politely hold price) 2. FLEXIBLE (meet in the middle) 3. FINAL OFFER (lowest you should go with reasoning). Also tell me: is their offer reasonable or a lowball? What is a fair final price?")
+        return page("Negotiator", f"<h1>Counter-Offer Responses</h1><pre>{output}</pre><a href='/sell/negotiator'>New Negotiation</a>", "/sell")
+    body = "<h1>🤝 Offer Negotiator</h1><form method='post'><input name='item' placeholder='What are you selling?'/><input name='asking' placeholder='Your asking price (e.g. 100)'/><input name='offer' placeholder='Their offer (e.g. 60)'/><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option><option>Other</option></select><button type='submit'>Generate Counter Offers</button></form>"
     return page("Negotiator", body, "/sell")
+
+@app.route("/hockey")
+def hockey():
+    if auth_required(): return redirect("/login")
+    body = "<h1>🏒 Hockey Coach Tools</h1>"
+    body += "<a href='/hockey/practice' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📋 Practice Planner — Full ice practice plans</a>"
+    body += "<a href='/hockey/drills' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🎯 Drill Generator — Drills by skill and focus</a>"
+    body += "<a href='/hockey/evaluation' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📊 Player Evaluation — Player feedback reports</a>"
+    body += "<a href='/hockey/communication' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📢 Team Communication — Parent and player announcements</a>"
+    return page("Hockey Coach", body)
+
+@app.route("/hockey/practice", methods=["GET", "POST"])
+def hockey_practice():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        level = request.form.get("level", "")
+        age = request.form.get("age", "")
+        duration = request.form.get("duration", "")
+        focus = request.form.get("focus", "")
+        players = request.form.get("players", "")
+        output = ai(f"Create a detailed ice hockey practice plan for: Level: {level}, Age group: {age}, Duration: {duration} minutes, Focus: {focus}, Number of players: {players}. Include: 1. WARMUP (with times) 2. SKATING/EDGES drill (with times and diagram description) 3. PUCK HANDLING drill (with times) 4. PASSING drill (with times) 5. SHOOTING drill (with times) 6. SCRIMMAGE or game situation (with times) 7. COOLDOWN. For each drill: name, setup, instructions, coaching points, and time. Make it practical and age-appropriate.")
+        return page("Practice Plan", f"<h1>Practice Plan Ready</h1><pre>{output}</pre><a href='/hockey/practice'>New Practice Plan</a>", "/hockey")
+    body = "<h1>📋 Practice Planner</h1><form method='post'><select name='level'><option>Beginner (Learn to Skate)</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><input name='age' placeholder='Age group (e.g. 8-10, 12-14, adults)'/><input name='duration' placeholder='Practice duration in minutes (e.g. 60, 90)'/><input name='players' placeholder='Number of players (e.g. 15)'/><textarea name='focus' placeholder='Focus areas (e.g. skating edges, defensive zone coverage, power play, puck battles)' style='height:80px'></textarea><button type='submit'>Generate Practice Plan</button></form>"
+    return page("Practice Planner", body, "/hockey")
+
+@app.route("/hockey/drills", methods=["GET", "POST"])
+def hockey_drills():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        level = request.form.get("level", "")
+        focus = request.form.get("focus", "")
+        num = request.form.get("num", "5")
+        output = ai(f"Generate {num} ice hockey drills for {level} level players focused on: {focus}. For each drill provide: 1. DRILL NAME 2. OBJECTIVE 3. SETUP (how to set up cones, pucks, players) 4. INSTRUCTIONS (step by step) 5. COACHING POINTS (what to look for) 6. PROGRESSION (how to make it harder). Make drills practical, engaging, and appropriate for the level.")
+        return page("Drills", f"<h1>Drills Ready</h1><pre>{output}</pre><a href='/hockey/drills'>Generate More Drills</a>", "/hockey")
+    body = "<h1>🎯 Drill Generator</h1><form method='post'><select name='level'><option>Beginner</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><textarea name='focus' placeholder='Focus area (e.g. crossovers, backhand passes, one-timers, defensive positioning, 1-on-1, breakouts)' style='height:80px'></textarea><select name='num'><option value='3'>3 drills</option><option value='5'>5 drills</option><option value='10'>10 drills</option></select><button type='submit'>Generate Drills</button></form>"
+    return page("Drill Generator", body, "/hockey")
+
+@app.route("/hockey/evaluation", methods=["GET", "POST"])
+def hockey_evaluation():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        player_name = request.form.get("player_name", "")
+        age = request.form.get("age", "")
+        position = request.form.get("position", "")
+        strengths = request.form.get("strengths", "")
+        improvements = request.form.get("improvements", "")
+        goals = request.form.get("goals", "")
+        output = ai(f"Write a professional, encouraging player evaluation report for: Name: {player_name}, Age: {age}, Position: {position}, Strengths observed: {strengths}, Areas for improvement: {improvements}, Season goals: {goals}. Include: 1. OVERALL ASSESSMENT (positive, professional tone) 2. STRENGTHS (detailed, specific) 3. AREAS FOR DEVELOPMENT (constructive, encouraging) 4. SPECIFIC DRILLS to work on at home 5. SEASON GOALS with milestones 6. COACHES MESSAGE (personal, motivating). Write as if sending to player and parents.")
+        return page("Player Evaluation", f"<h1>Player Evaluation Report</h1><pre>{output}</pre><a href='/hockey/evaluation'>New Evaluation</a>", "/hockey")
+    body = "<h1>📊 Player Evaluation</h1><form method='post'><input name='player_name' placeholder='Player name'/><input name='age' placeholder='Player age'/><select name='position'><option>Forward</option><option>Defense</option><option>Goalie</option></select><textarea name='strengths' placeholder='Observed strengths (e.g. strong skater, good compete level, great attitude)' style='height:80px'></textarea><textarea name='improvements' placeholder='Areas to improve (e.g. backhand shot, defensive positioning, edge work)' style='height:80px'></textarea><textarea name='goals' placeholder='Season goals for this player' style='height:60px'></textarea><button type='submit'>Generate Evaluation</button></form>"
+    return page("Player Evaluation", body, "/hockey")
+
+@app.route("/hockey/communication", methods=["GET", "POST"])
+def hockey_communication():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        msg_type = request.form.get("msg_type", "")
+        details = request.form.get("details", "")
+        tone = request.form.get("tone", "")
+        output = ai(f"Write a {tone} hockey team communication for: Type: {msg_type}, Details: {details}. Format it ready to copy and send. Include appropriate greeting, clear information, any action items, and professional closing. Sign off as 'Coach Doug'.")
+        return page("Communication", f"<h1>Message Ready</h1><pre>{output}</pre><a href='/hockey/communication'>Write Another</a>", "/hockey")
+    body = "<h1>📢 Team Communication</h1><form method='post'><select name='msg_type'><option>Game day reminder</option><option>Practice schedule update</option><option>Tournament information</option><option>Team meeting notice</option><option>Season wrap-up message</option><option>Player recognition announcement</option><option>Equipment reminder</option><option>Team fundraiser</option><option>Weather cancellation</option><option>End of season thank you</option></select><textarea name='details' placeholder='Specific details (date, time, location, what to bring, any special notes)' style='height:100px'></textarea><select name='tone'><option>Friendly and casual</option><option>Professional and formal</option><option>Motivating and energetic</option><option>Brief and informational</option></select><button type='submit'>Generate Message</button></form>"
+    return page("Team Communication", body, "/hockey")
 
 TOOLS = {
     "viralshorts": ("ViralShorts", "topic", "Write 3 TikTok/Reels style video scripts about: {i}. Each: hook (1 line), body (3-4 lines), CTA (1 line). Punchy and viral."),
