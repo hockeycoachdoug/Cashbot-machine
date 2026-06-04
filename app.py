@@ -60,6 +60,7 @@ def home():
     body += "<a href='/fbmarket' class='btn' style='background:#1877f2'>FB Marketplace</a>"
     body += "<a href='/sell' class='btn' style='background:#e44d26'>Selling Tools</a>"
     body += "<a href='/hockey' class='btn' style='background:#00457c'>Hockey Coach</a>"
+    body += "<a href='/money' class='btn' style='background:#2d6a2d'>Money Tools</a>"
     body += "<br><br><a href='/logout' style='color:#666;font-size:0.9em'>Logout</a>"
     return page("Cash.bot", body, "/")
 
@@ -188,7 +189,7 @@ def bulklister():
         platform = request.form.get("platform", "")
         output = ai(f"Create ready-to-post {platform} listings for each of these items: {items}. For each: TITLE, one-paragraph DESCRIPTION, and SUGGESTED PRICE. Separate each listing clearly with the item name as a header.")
         return page("Bulk Lister", f"<h1>Bulk Listings Ready</h1><pre>{output}</pre><a href='/sell/bulklister'>List More</a>", "/sell")
-    body = "<h1>📦 Bulk Lister</h1><form method='post'><textarea name='items' placeholder='One item per line with condition. Example:\nNike Air Max size 10, good condition\niPad mini 3rd gen, cracked screen\nKitchenAid mixer, like new' style='height:200px'></textarea><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option></select><button type='submit'>Generate All Listings</button></form>"
+    body = "<h1>📦 Bulk Lister</h1><form method='post'><textarea name='items' placeholder='One item per line with condition...' style='height:200px'></textarea><select name='platform'><option>eBay</option><option>Facebook Marketplace</option><option>Craigslist</option></select><button type='submit'>Generate All Listings</button></form>"
     return page("Bulk Lister", body, "/sell")
 
 @app.route("/sell/negotiator", methods=["GET", "POST"])
@@ -208,10 +209,10 @@ def negotiator():
 def hockey():
     if auth_required(): return redirect("/login")
     body = "<h1>🏒 Hockey Coach Tools</h1>"
-    body += "<a href='/hockey/practice' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📋 Practice Planner — Full ice practice plans</a>"
-    body += "<a href='/hockey/drills' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🎯 Drill Generator — Drills by skill and focus</a>"
-    body += "<a href='/hockey/evaluation' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📊 Player Evaluation — Player feedback reports</a>"
-    body += "<a href='/hockey/communication' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📢 Team Communication — Parent and player announcements</a>"
+    body += "<a href='/hockey/practice' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📋 Practice Planner</a>"
+    body += "<a href='/hockey/drills' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🎯 Drill Generator</a>"
+    body += "<a href='/hockey/evaluation' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📊 Player Evaluation</a>"
+    body += "<a href='/hockey/communication' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📢 Team Communication</a>"
     return page("Hockey Coach", body)
 
 @app.route("/hockey/practice", methods=["GET", "POST"])
@@ -223,9 +224,9 @@ def hockey_practice():
         duration = request.form.get("duration", "")
         focus = request.form.get("focus", "")
         players = request.form.get("players", "")
-        output = ai(f"Create a detailed ice hockey practice plan for: Level: {level}, Age group: {age}, Duration: {duration} minutes, Focus: {focus}, Number of players: {players}. Include: 1. WARMUP (with times) 2. SKATING/EDGES drill (with times and diagram description) 3. PUCK HANDLING drill (with times) 4. PASSING drill (with times) 5. SHOOTING drill (with times) 6. SCRIMMAGE or game situation (with times) 7. COOLDOWN. For each drill: name, setup, instructions, coaching points, and time. Make it practical and age-appropriate.")
+        output = ai(f"Create a detailed ice hockey practice plan for: Level: {level}, Age group: {age}, Duration: {duration} minutes, Focus: {focus}, Number of players: {players}. Include: 1. WARMUP (with times) 2. SKATING/EDGES drill 3. PUCK HANDLING drill 4. PASSING drill 5. SHOOTING drill 6. SCRIMMAGE 7. COOLDOWN. For each drill: name, setup, instructions, coaching points, and time.")
         return page("Practice Plan", f"<h1>Practice Plan Ready</h1><pre>{output}</pre><a href='/hockey/practice'>New Practice Plan</a>", "/hockey")
-    body = "<h1>📋 Practice Planner</h1><form method='post'><select name='level'><option>Beginner (Learn to Skate)</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><input name='age' placeholder='Age group (e.g. 8-10, 12-14, adults)'/><input name='duration' placeholder='Practice duration in minutes (e.g. 60, 90)'/><input name='players' placeholder='Number of players (e.g. 15)'/><textarea name='focus' placeholder='Focus areas (e.g. skating edges, defensive zone coverage, power play, puck battles)' style='height:80px'></textarea><button type='submit'>Generate Practice Plan</button></form>"
+    body = "<h1>📋 Practice Planner</h1><form method='post'><select name='level'><option>Beginner</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><input name='age' placeholder='Age group (e.g. 8-10, 12-14)'/><input name='duration' placeholder='Duration in minutes (e.g. 60, 90)'/><input name='players' placeholder='Number of players (e.g. 15)'/><textarea name='focus' placeholder='Focus areas (e.g. skating edges, defensive zone, power play)' style='height:80px'></textarea><button type='submit'>Generate Practice Plan</button></form>"
     return page("Practice Planner", body, "/hockey")
 
 @app.route("/hockey/drills", methods=["GET", "POST"])
@@ -235,9 +236,9 @@ def hockey_drills():
         level = request.form.get("level", "")
         focus = request.form.get("focus", "")
         num = request.form.get("num", "5")
-        output = ai(f"Generate {num} ice hockey drills for {level} level players focused on: {focus}. For each drill provide: 1. DRILL NAME 2. OBJECTIVE 3. SETUP (how to set up cones, pucks, players) 4. INSTRUCTIONS (step by step) 5. COACHING POINTS (what to look for) 6. PROGRESSION (how to make it harder). Make drills practical, engaging, and appropriate for the level.")
-        return page("Drills", f"<h1>Drills Ready</h1><pre>{output}</pre><a href='/hockey/drills'>Generate More Drills</a>", "/hockey")
-    body = "<h1>🎯 Drill Generator</h1><form method='post'><select name='level'><option>Beginner</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><textarea name='focus' placeholder='Focus area (e.g. crossovers, backhand passes, one-timers, defensive positioning, 1-on-1, breakouts)' style='height:80px'></textarea><select name='num'><option value='3'>3 drills</option><option value='5'>5 drills</option><option value='10'>10 drills</option></select><button type='submit'>Generate Drills</button></form>"
+        output = ai(f"Generate {num} ice hockey drills for {level} level players focused on: {focus}. For each drill: 1. DRILL NAME 2. OBJECTIVE 3. SETUP 4. INSTRUCTIONS 5. COACHING POINTS 6. PROGRESSION.")
+        return page("Drills", f"<h1>Drills Ready</h1><pre>{output}</pre><a href='/hockey/drills'>Generate More</a>", "/hockey")
+    body = "<h1>🎯 Drill Generator</h1><form method='post'><select name='level'><option>Beginner</option><option>Novice</option><option>Atom</option><option>Peewee</option><option>Bantam</option><option>Midget</option><option>Junior</option><option>Adult Rec</option></select><textarea name='focus' placeholder='Focus area (e.g. crossovers, backhand passes, 1-on-1, breakouts)' style='height:80px'></textarea><select name='num'><option value='3'>3 drills</option><option value='5'>5 drills</option><option value='10'>10 drills</option></select><button type='submit'>Generate Drills</button></form>"
     return page("Drill Generator", body, "/hockey")
 
 @app.route("/hockey/evaluation", methods=["GET", "POST"])
@@ -250,9 +251,9 @@ def hockey_evaluation():
         strengths = request.form.get("strengths", "")
         improvements = request.form.get("improvements", "")
         goals = request.form.get("goals", "")
-        output = ai(f"Write a professional, encouraging player evaluation report for: Name: {player_name}, Age: {age}, Position: {position}, Strengths observed: {strengths}, Areas for improvement: {improvements}, Season goals: {goals}. Include: 1. OVERALL ASSESSMENT (positive, professional tone) 2. STRENGTHS (detailed, specific) 3. AREAS FOR DEVELOPMENT (constructive, encouraging) 4. SPECIFIC DRILLS to work on at home 5. SEASON GOALS with milestones 6. COACHES MESSAGE (personal, motivating). Write as if sending to player and parents.")
+        output = ai(f"Write a professional encouraging player evaluation for: Name: {player_name}, Age: {age}, Position: {position}, Strengths: {strengths}, Improvements needed: {improvements}, Goals: {goals}. Include: 1. OVERALL ASSESSMENT 2. STRENGTHS 3. AREAS FOR DEVELOPMENT 4. HOME DRILLS to work on 5. SEASON GOALS 6. COACHES MESSAGE. Sign off as Coach Doug.")
         return page("Player Evaluation", f"<h1>Player Evaluation Report</h1><pre>{output}</pre><a href='/hockey/evaluation'>New Evaluation</a>", "/hockey")
-    body = "<h1>📊 Player Evaluation</h1><form method='post'><input name='player_name' placeholder='Player name'/><input name='age' placeholder='Player age'/><select name='position'><option>Forward</option><option>Defense</option><option>Goalie</option></select><textarea name='strengths' placeholder='Observed strengths (e.g. strong skater, good compete level, great attitude)' style='height:80px'></textarea><textarea name='improvements' placeholder='Areas to improve (e.g. backhand shot, defensive positioning, edge work)' style='height:80px'></textarea><textarea name='goals' placeholder='Season goals for this player' style='height:60px'></textarea><button type='submit'>Generate Evaluation</button></form>"
+    body = "<h1>📊 Player Evaluation</h1><form method='post'><input name='player_name' placeholder='Player name'/><input name='age' placeholder='Player age'/><select name='position'><option>Forward</option><option>Defense</option><option>Goalie</option></select><textarea name='strengths' placeholder='Observed strengths...' style='height:80px'></textarea><textarea name='improvements' placeholder='Areas to improve...' style='height:80px'></textarea><textarea name='goals' placeholder='Season goals for this player' style='height:60px'></textarea><button type='submit'>Generate Evaluation</button></form>"
     return page("Player Evaluation", body, "/hockey")
 
 @app.route("/hockey/communication", methods=["GET", "POST"])
@@ -262,10 +263,71 @@ def hockey_communication():
         msg_type = request.form.get("msg_type", "")
         details = request.form.get("details", "")
         tone = request.form.get("tone", "")
-        output = ai(f"Write a {tone} hockey team communication for: Type: {msg_type}, Details: {details}. Format it ready to copy and send. Include appropriate greeting, clear information, any action items, and professional closing. Sign off as 'Coach Doug'.")
+        output = ai(f"Write a {tone} hockey team communication for: Type: {msg_type}, Details: {details}. Format ready to copy and send. Include greeting, clear information, action items, and professional closing. Sign off as Coach Doug.")
         return page("Communication", f"<h1>Message Ready</h1><pre>{output}</pre><a href='/hockey/communication'>Write Another</a>", "/hockey")
-    body = "<h1>📢 Team Communication</h1><form method='post'><select name='msg_type'><option>Game day reminder</option><option>Practice schedule update</option><option>Tournament information</option><option>Team meeting notice</option><option>Season wrap-up message</option><option>Player recognition announcement</option><option>Equipment reminder</option><option>Team fundraiser</option><option>Weather cancellation</option><option>End of season thank you</option></select><textarea name='details' placeholder='Specific details (date, time, location, what to bring, any special notes)' style='height:100px'></textarea><select name='tone'><option>Friendly and casual</option><option>Professional and formal</option><option>Motivating and energetic</option><option>Brief and informational</option></select><button type='submit'>Generate Message</button></form>"
+    body = "<h1>📢 Team Communication</h1><form method='post'><select name='msg_type'><option>Game day reminder</option><option>Practice schedule update</option><option>Tournament information</option><option>Team meeting notice</option><option>Season wrap-up message</option><option>Player recognition announcement</option><option>Equipment reminder</option><option>Weather cancellation</option><option>End of season thank you</option></select><textarea name='details' placeholder='Specific details (date, time, location, what to bring)' style='height:100px'></textarea><select name='tone'><option>Friendly and casual</option><option>Professional and formal</option><option>Motivating and energetic</option><option>Brief and informational</option></select><button type='submit'>Generate Message</button></form>"
     return page("Team Communication", body, "/hockey")
+
+@app.route("/money")
+def money():
+    if auth_required(): return redirect("/login")
+    body = "<h1>💰 Money Tools</h1>"
+    body += "<a href='/money/budget' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>📊 Budget Planner — Track income vs expenses</a>"
+    body += "<a href='/money/hustle' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💡 Side Hustle Finder — Find gigs based on your skills</a>"
+    body += "<a href='/money/rate' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>💲 Freelance Rate Calculator — What to charge for any service</a>"
+    body += "<a href='/money/savings' style='display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:8px;margin:8px 0'>🎯 Savings Goal Tracker — Map out how to hit a money goal</a>"
+    return page("Money Tools", body)
+
+@app.route("/money/budget", methods=["GET", "POST"])
+def money_budget():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        income = request.form.get("income", "")
+        expenses = request.form.get("expenses", "")
+        goals = request.form.get("goals", "")
+        output = ai(f"Create a detailed personal budget plan for someone with: Monthly income: ${income}, Current expenses: {expenses}, Financial goals: {goals}. Include: 1. INCOME BREAKDOWN 2. EXPENSE ANALYSIS (categorized) 3. BUDGET ALLOCATION (using 50/30/20 rule or best fit) 4. AREAS TO CUT BACK 5. MONTHLY SAVINGS POTENTIAL 6. ACTION STEPS to reach their goals. Be specific with dollar amounts.")
+        return page("Budget Plan", f"<h1>Your Budget Plan</h1><pre>{output}</pre><a href='/money/budget'>New Budget</a>", "/money")
+    body = "<h1>📊 Budget Planner</h1><form method='post'><input name='income' placeholder='Monthly take-home income (e.g. 3000)'/><textarea name='expenses' placeholder='List your monthly expenses (e.g. rent $1000, car $300, food $400, phone $80, subscriptions $50)' style='height:150px'></textarea><textarea name='goals' placeholder='Your financial goals (e.g. save $5000 emergency fund, pay off credit card, save for vacation)' style='height:80px'></textarea><button type='submit'>Generate Budget Plan</button></form>"
+    return page("Budget Planner", body, "/money")
+
+@app.route("/money/hustle", methods=["GET", "POST"])
+def money_hustle():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        skills = request.form.get("skills", "")
+        time = request.form.get("time", "")
+        location = request.form.get("location", "")
+        goal = request.form.get("goal", "")
+        output = ai(f"Find the best side hustles for someone with: Skills/experience: {skills}, Available time: {time} hours per week, Location: {location}, Income goal: ${goal}/month. Provide 10 specific side hustle ideas ranked by: earning potential, ease of start, fit with their skills. For each: name, how to start today, realistic monthly earnings, where to find clients/customers, and one tip to succeed.")
+        return page("Side Hustles", f"<h1>Your Side Hustle Options</h1><pre>{output}</pre><a href='/money/hustle'>Search Again</a>", "/money")
+    body = "<h1>💡 Side Hustle Finder</h1><form method='post'><textarea name='skills' placeholder='Your skills and experience (e.g. coaching hockey, teaching, writing, driving, cooking, fixing things)' style='height:100px'></textarea><input name='time' placeholder='Hours available per week (e.g. 10)'/><input name='location' placeholder='Your city or region'/><input name='goal' placeholder='Monthly income goal (e.g. 500)'/><button type='submit'>Find Side Hustles</button></form>"
+    return page("Side Hustle Finder", body, "/money")
+
+@app.route("/money/rate", methods=["GET", "POST"])
+def money_rate():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        service = request.form.get("service", "")
+        experience = request.form.get("experience", "")
+        location = request.form.get("location", "")
+        hours = request.form.get("hours", "")
+        output = ai(f"Calculate the right freelance rate for: Service: {service}, Experience level: {experience}, Location: {location}, Desired hours per week: {hours}. Provide: 1. MARKET RATE RANGE (low, mid, high) for this service 2. RECOMMENDED HOURLY RATE for their experience level 3. PROJECT RATE (if applicable) 4. MONTHLY INCOME POTENTIAL at this rate 5. HOW TO RAISE RATES over time 6. WHERE TO FIND CLIENTS willing to pay this rate. Be specific and realistic.")
+        return page("Rate Calculator", f"<h1>Your Freelance Rate</h1><pre>{output}</pre><a href='/money/rate'>Calculate Another</a>", "/money")
+    body = "<h1>💲 Freelance Rate Calculator</h1><form method='post'><input name='service' placeholder='Service you offer (e.g. hockey coaching, writing, web design, tutoring)'/><select name='experience'><option>Beginner (0-1 years)</option><option>Intermediate (2-4 years)</option><option>Experienced (5-9 years)</option><option>Expert (10+ years)</option></select><input name='location' placeholder='Your city or country'/><input name='hours' placeholder='Hours per week you want to work (e.g. 20)'/><button type='submit'>Calculate My Rate</button></form>"
+    return page("Rate Calculator", body, "/money")
+
+@app.route("/money/savings", methods=["GET", "POST"])
+def money_savings():
+    if auth_required(): return redirect("/login")
+    if request.method == "POST":
+        goal = request.form.get("goal", "")
+        amount = request.form.get("amount", "")
+        saved = request.form.get("saved", "")
+        monthly = request.form.get("monthly", "")
+        output = ai(f"Create a savings plan for: Goal: {goal}, Total amount needed: ${amount}, Already saved: ${saved}, Can save monthly: ${monthly}. Include: 1. TIME TO GOAL (how many months) 2. MONTHLY MILESTONE TRACKER (month by month breakdown) 3. WAYS TO SAVE FASTER (specific actionable ideas) 4. WAYS TO EARN MORE to hit goal sooner 5. MOTIVATIONAL MILESTONES (celebrate at 25%, 50%, 75%) 6. WHAT TO DO IF YOU MISS A MONTH. Be encouraging and specific.")
+        return page("Savings Plan", f"<h1>Your Savings Plan</h1><pre>{output}</pre><a href='/money/savings'>New Goal</a>", "/money")
+    body = "<h1>🎯 Savings Goal Tracker</h1><form method='post'><input name='goal' placeholder='What are you saving for? (e.g. emergency fund, vacation, new car)'/><input name='amount' placeholder='Total amount needed (e.g. 5000)'/><input name='saved' placeholder='Amount already saved (e.g. 500)'/><input name='monthly' placeholder='Amount you can save per month (e.g. 200)'/><button type='submit'>Generate Savings Plan</button></form>"
+    return page("Savings Goal Tracker", body, "/money")
 
 TOOLS = {
     "viralshorts": ("ViralShorts", "topic", "Write 3 TikTok/Reels style video scripts about: {i}. Each: hook (1 line), body (3-4 lines), CTA (1 line). Punchy and viral."),
